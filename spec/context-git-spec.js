@@ -90,13 +90,21 @@ describe("Context Git", function () {
 								expect(confirm.detailMessage).toEqual(jasmine.any(String));
 							});
 						}
-						it("should be called if atom.confirm returns true", async function () {
+						it("should be called if atom.confirm is accepted", async function () {
 							this.confirmSpy.and.callFake((opts, callback) => callback(0));
 							await dispatch({ target: atom.views.getView(atom.workspace) });
 							expect(this.confirmSpy).toHaveBeenCalled();
 							expect(this.cmdSpy).toHaveBeenCalled();
 						});
-						it("should not be called if atom.confirm returns false", async function () {
+						it("should be called if atom.confirm is accepted with 'Never Show...'", async function () {
+							this.confirmSpy.and.callFake((opts, callback) => callback(1));
+							const configSpy = spyOn(atom.config, "set");
+							await dispatch({ target: atom.views.getView(atom.workspace) });
+							expect(configSpy).toHaveBeenCalled();
+							expect(this.confirmSpy).toHaveBeenCalled();
+							expect(this.cmdSpy).toHaveBeenCalled();
+						});
+						it("should not be called if atom.confirm is canceled", async function () {
 							this.confirmSpy.and.callFake((opts, callback) => callback(2));
 							try {
 								await dispatch({ target: atom.views.getView(atom.workspace) });
